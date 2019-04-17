@@ -16,7 +16,7 @@ steps:
 - task: qetza.replacetokens.replacetokens-task.replacetokens@3
   displayName: 'Replace tokens for "MyGet Notification Bot"'
   inputs:
-    rootDirectory: /src/
+    rootDirectory: src/
     targetFiles: azuredeploy.parameters.json
     actionOnMissing: fail
 
@@ -26,5 +26,5 @@ steps:
     azureSubscription: 'Azure - Codit-Arcus'
     resourceGroupName: 'codit-arcus'
     location: 'West Europe'
-    csmFile: /src/azuredeploy.json
-    csmParametersFile: /src/azuredeploy.parameters.json
+    csmFile: src/azuredeploy.json
+    csmParametersFile: src/azuredeploy.parameters.json
