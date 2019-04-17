@@ -12,6 +12,7 @@ pool:
 variables:
   GitHub.Bot.Name: 'arcus-automation'
   LogicApp.Name: 'arcus-shared-myget-notifications'
+  Packages.Filter.Suffix: 'All'
 steps:
 - task: qetza.replacetokens.replacetokens-task.replacetokens@3
   displayName: 'Replace tokens for "MyGet Notification Bot"'

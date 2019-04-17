@@ -5,6 +5,9 @@
         "LogicApp.Name": {
             "value": "#{LogicApp.Name}#"
         },
+        "Packages.Filter.Suffix": {
+            "value": "#{Packages.Filter.Suffix}#"
+        },
         "GitHub.Bot.Name": {
             "value": "#{GitHub.Bot.Name}#"
         },

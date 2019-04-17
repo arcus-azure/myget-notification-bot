@@ -14,6 +14,13 @@ A bot to post comments on GitHub pull requests when a new NuGet package is pushe
 - GitHub user that will be used to post comments
 - Push NuGet versions in format of `PR-{pr-id}`, but you can also tweak the template to use your pattern
 
+# What does it do?
+Our MyGet bot will automatically update your pull requests with guidance on how to consume the published NuGet package.
+
+![Demo](./media/demo.png)
+
+As of today, it uses package filters to filter out individual packages ending with a given suffix.
+
 # Deployment
 1. Deploy the ARM template in `src` or use the "Deploy to Azure" button
 2. Create a new webhook registration on your MyGet feed for 'Package Added' events

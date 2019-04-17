@@ -9,6 +9,12 @@
                 "description": "Name of the Logic App that will handle new Docker Hub webhooks"
             }
         },
+        "Packages.Filter.Suffix": {
+            "type": "string",
+            "metadata": {
+                "description": "Suffix used to filter out packages"
+            }
+        },
         "GitHub.Bot.Name": {
             "type": "string",
             "defaultValue": "github-bot",
@@ -96,7 +102,7 @@
                                         "not": {
                                             "endsWith": [
                                                 "@triggerBody()?['Payload']?['PackageIdentifier']",
-                                                "All"
+                                                "[parameters('Packages.Filter.Suffix')]"
                                             ]
                                         }
                                     },
