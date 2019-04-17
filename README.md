@@ -1,4 +1,4 @@
-# MyGet Bot for GitHub Pull Requests/Issues
+# MyGet Bot for GitHub Pull Requests
 A bot to post comments on GitHub pull requests when a new NuGet package is pushed to MyGet.
 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Farcus-azure%2Fmyget-notification-bot%2Fmaster%2Fsrc%2Fazuredeploy.json" target="_blank">
