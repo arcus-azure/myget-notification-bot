@@ -1,0 +1,211 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "LogicApp.Name": {
+            "type": "string",
+            "maxLength": 80,
+            "metadata": {
+                "description": "Name of the Logic App that will handle new Docker Hub webhooks"
+            }
+        },
+        "GitHub.Bot.Name": {
+            "type": "string",
+            "defaultValue": "github-bot",
+            "metadata": {
+                "description": "Name of the GitHub account that will act as a bot"
+            }
+        },
+        "GitHub.Bot.Password": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password to authenticate with for the GitHub account that will act as a bot"
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2016-06-01",
+            "name": "[parameters('LogicApp.Name')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "actions": {
+                        "Define_GitHub_Comment_Text": {
+                            "inputs": "A new preview package for `@{triggerBody()?['Payload']?['PackageIdentifier']}` is available on MyGet.\n\nYou can pull it locally via the CLI:\n```shell\nPM> Install-Package @{triggerBody()?['Payload']?['PackageIdentifier']} -Version @{triggerBody()?['Payload']?['PackageVersion']} -Source @{triggerBody()?['Payload']?['FeedUrl']}api/v3/index.json\n```",
+                            "runAfter": {
+                                "Determine_GitHub_PR_Id": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose"
+                        },
+                        "Determine_GitHub_PR_Id": {
+                            "inputs": "@last(split(triggerBody()?['Payload']?['PackageVersion'],'-'))",
+                            "runAfter": {
+                                "Stop_if_it's_not_an_\"All\"_package": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose"
+                        },
+                        "Post_Comment_on_PR": {
+                            "inputs": {
+                                "authentication": {
+                                    "password": "[parameters('GitHub.Bot.Password')]",
+                                    "type": "Basic",
+                                    "username": "[parameters('GitHub.Bot.Name')]"
+                                },
+                                "body": {
+                                    "body": "@{outputs('Define_GitHub_Comment_Text')}"
+                                },
+                                "method": "POST",
+                                "uri": "@{concat('https://api.github.com/repos/', first(skip(outputs('Splitted_Project_URL'), 3)),'/', last(outputs('Splitted_Project_URL')),'/issues/', outputs('Determine_GitHub_PR_Id'),'/comments')}"
+                            },
+                            "runAfter": {
+                                "Splitted_Project_URL": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Http"
+                        },
+                        "Splitted_Project_URL": {
+                            "inputs": "@split(triggerBody()?['Payload']?['PackageMetadata']?['ProjectUrl'],'/')",
+                            "runAfter": {
+                                "Define_GitHub_Comment_Text": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose"
+                        },
+                        "Stop_if_it's_not_an_\"All\"_package": {
+                            "actions": {
+                                "Terminate": {
+                                    "inputs": {
+                                        "runStatus": "Succeeded"
+                                    },
+                                    "runAfter": {},
+                                    "type": "Terminate"
+                                }
+                            },
+                            "expression": {
+                                "or": [
+                                    {
+                                        "not": {
+                                            "endsWith": [
+                                                "@triggerBody()?['Payload']?['PackageIdentifier']",
+                                                "All"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "not": {
+                                            "equals": [
+                                                "@triggerBody()?['PayloadType']",
+                                                "PackageAddedWebHookEventPayloadV1"
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "runAfter": {},
+                            "type": "If"
+                        }
+                    },
+                    "contentVersion": "1.0.0.0",
+                    "outputs": {},
+                    "parameters": {},
+                    "triggers": {
+                        "manual": {
+                            "inputs": {
+                                "schema": {
+                                    "properties": {
+                                        "Identifier": {
+                                            "type": "string"
+                                        },
+                                        "Payload": {
+                                            "properties": {
+                                                "FeedIdentifier": {
+                                                    "type": "string"
+                                                },
+                                                "FeedUrl": {
+                                                    "type": "string"
+                                                },
+                                                "PackageDetailsUrl": {
+                                                    "type": "string"
+                                                },
+                                                "PackageDownloadUrl": {
+                                                    "type": "string"
+                                                },
+                                                "PackageIdentifier": {
+                                                    "type": "string"
+                                                },
+                                                "PackageMetadata": {
+                                                    "properties": {
+                                                        "Authors": {
+                                                            "type": "string"
+                                                        },
+                                                        "Dependencies": {
+                                                            "type": "array"
+                                                        },
+                                                        "Description": {
+                                                            "type": "string"
+                                                        },
+                                                        "IconUrl": {
+                                                            "type": "string"
+                                                        },
+                                                        "LicenseNames": {
+                                                            "type": "string"
+                                                        },
+                                                        "LicenseUrl": {
+                                                            "type": "string"
+                                                        },
+                                                        "MinClientVersion": {},
+                                                        "ProjectUrl": {
+                                                            "type": "string"
+                                                        },
+                                                        "ReleaseNotes": {},
+                                                        "Size": {
+                                                            "type": "integer"
+                                                        },
+                                                        "Tags": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "PackageType": {
+                                                    "type": "string"
+                                                },
+                                                "PackageVersion": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "PayloadType": {
+                                            "type": "string"
+                                        },
+                                        "Username": {
+                                            "type": "string"
+                                        },
+                                        "When": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "kind": "Http",
+                            "type": "Request"
+                        }
+                    }
+                },
+                "parameters": {}
+            },
+            "dependsOn": []
+        }
+    ]
+}
