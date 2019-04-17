@@ -19,5 +19,16 @@ A bot to post comments on GitHub pull requests when a new NuGet package is pushe
 2. Create a new webhook registration on your MyGet feed for 'Package Added' events
 3. All set!
 
+## How it works
+The bot is a simple Azure Logic App which will receive webhook notifications from MyGet when new packages are pushed to your feed.
+
+It will interpret the passed information to compose a comment on the PR that triggered the new packages.
+
+By default the Logic App will determine the PR ID given it assumes to have the `PR-{pr-id}` format.
+
+![Overview](./media/schematic.png)
+
+If your pattern diverts from this pattern you can always tweak the bot and deploy that instead.
+
 # License Information
 This is licensed under The MIT License (MIT). Which means that you can use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the web application. But you always need to state that Tom Kerkhove is the original author of this web application.
